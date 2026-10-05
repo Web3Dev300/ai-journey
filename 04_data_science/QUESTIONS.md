@@ -3,3 +3,5 @@
 14.You are tasked with developing a model to predict which customers are likely to chrun from a subscription service. What steps would you take to build this model, and can you provide a sample Python code snippet to illustrate the data preparation and model training process?
 
 15. You are tasked with developing a sentiment analysis model using deep learning to understand customer opinions from reviews. What steps would you take to build this model, and can you provide a sample Python code snippet to illustrate how you would preprocess data and train a simple deep learning model
+
+16. You are tasked with identifying unusual transactions in a company's financial data that might suggest fraudulent activity. What steps would you take to develop an anomaly detection model, and can you provice a sample Python code snippet to illustrate how you would preprocess the data and apply an anomaly detection technique?
