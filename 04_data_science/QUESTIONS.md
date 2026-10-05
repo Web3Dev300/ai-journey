@@ -1,1 +1,3 @@
 13.You are given a dataset containing demographic and purchasing behavior data for a group of customers. Your task is to segment these customers into distinct groups based on similarities in their purchasing behavior and demographics. What steps would you take to perform this segmentation, and can you provide a sample Python code snippet to illustrate the initial stages of data handling and model application?
+
+14.You are tasked with developing a model to predict which customers are likely to chrun from a subscription service. What steps would you take to build this model, and can you provide a sample Python code snippet to illustrate the data preparation and model training process?
