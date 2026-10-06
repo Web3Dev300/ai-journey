@@ -1,47 +1,50 @@
-import numpy as np
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Embedding, LSTM, Dense, Dropout
-from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow import keras
+from tensorflow.keras import layers
 
-# Load and prepare dataset
-texts = [
-    "I love this product! It's amazing.",
-    "This is the worst experience I've ever had.",
-    "Absolutely fantastic service, highly recommend.",
-    "I hate this item, it's terrible.",
-    "Great quality and fast shipping.",
-    "Not worth the money, very disappointed.",
-    "Excellent customer support, very helpful.",
-    "The product broke after one use, very poor quality.",
-    "I'm extremely satisfied with my purchase.",
-    "Terrible, I will never buy from this company again."
-]
-labels = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0]) # 1 for positive sentiment, 0 for negative sentiment
+VOCAB_SIZE = 10000  # Keep the 10,000 most frequent words
+MAX_LENGTH = 100    # Use the last 100 words of each review
 
-# Preprocess text data
-tokenizer = Tokenizer(num_words=1000, oov_token="<OOV>")
-tokenizer.fit_on_texts(texts)
-sequences = tokenizer.texts_to_sequences(texts)
-data = pad_sequences(sequences, maxlen=20, padding='post')
+keras.utils.set_random_seed(42)  # Same result on every run
 
-# Build LSTM model
-model = Sequential()
-model.add(Embedding(input_dim=1000, output_dim=64))
-model.add(LSTM(64,return_sequences=True))
-model.add(Dropout(0.5))
-model.add(LSTM(32))
-model.add(Dense(1, activation='sigmoid'))
+# 1. Load 50,000 real movie reviews (IMDB, downloaded on first run). The reviews are already
+#    tokenized: every word is replaced by an integer ID. Labels: 1 = positive, 0 = negative.
+(x_train, y_train), (x_test, y_test) = keras.datasets.imdb.load_data(num_words=VOCAB_SIZE)
 
-# Compile and train the model
+# 2. Pad or cut every review to the same length
+x_train = keras.utils.pad_sequences(x_train, maxlen=MAX_LENGTH)
+x_test = keras.utils.pad_sequences(x_test, maxlen=MAX_LENGTH)
+
+# 3. Build the LSTM model
+model = keras.Sequential([
+    layers.Embedding(input_dim=VOCAB_SIZE, output_dim=32),  # Word ID -> vector of 32 numbers
+    layers.LSTM(32),                                        # Reads the review word by word
+    layers.Dropout(0.5),                                    # Reduces overfitting
+    layers.Dense(1, activation='sigmoid')                   # Probability that the review is positive
+])
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-model.fit(data,labels, epochs=10, batch_size=2, validation_split=0.2)
 
-# Evaluate the model
-loss,accuracy = model.evaluate(data,labels)
-print(f"Loss: {loss}, Accuracy: {accuracy}")
+# 4. Train; stop early when the validation loss stops improving
+early_stopping = keras.callbacks.EarlyStopping(monitor='val_loss', patience=1, restore_best_weights=True)
+model.fit(x_train, y_train, epochs=5, batch_size=128, validation_split=0.2, callbacks=[early_stopping], verbose=2)
 
-# Prediction (optional)
-predictions = model.predict(data)
-print(predictions)
+# 5. Evaluate on 25,000 reviews the model has never seen
+loss, accuracy = model.evaluate(x_test, y_test, verbose=0)
+baseline = max(y_test.mean(), 1 - y_test.mean())
+print(f"Test accuracy: {accuracy:.2f} (baseline, always guessing one class: {baseline:.2f})")
 
+# 6. Try it on new reviews
+word_index = keras.datasets.imdb.get_word_index()
+
+
+def encode_review(text):
+    """Turns raw text into the same integer IDs the model was trained on."""
+    words = text.lower().replace('.', ' ').replace(',', ' ').replace('!', ' ').split()
+    # IDs are shifted by 3 in this dataset: 0 = padding, 1 = start of review, 2 = unknown word
+    ids = [1] + [word_index[w] + 3 if w in word_index and word_index[w] + 3 < VOCAB_SIZE else 2 for w in words]
+    return keras.utils.pad_sequences([ids], maxlen=MAX_LENGTH)
+
+
+for review in ["This movie was fantastic, I loved every minute of it.",
+               "Terrible film. Boring plot and awful acting, a complete waste of time."]:
+    score = model.predict(encode_review(review), verbose=0)[0][0]
+    print(f"{score:.2f} positive -> {review}")

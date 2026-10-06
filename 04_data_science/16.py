@@ -1,9 +1,9 @@
-import numpy as np
+import os
+
 import pandas as pd
 from sklearn.ensemble import IsolationForest
-from sklearn.preprocessing import StandardScaler
 
-import os
+REVIEW_CAPACITY = 20  # How many transactions the fraud team can check by hand
 
 # Load dataset
 csv_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'transactions.csv')
@@ -12,16 +12,27 @@ data['transaction_time'] = pd.to_datetime(data['transaction_time'])
 
 # Feature Engineering
 data['hour_of_day'] = data['transaction_time'].dt.hour
+features = ['amount', 'hour_of_day']  # Isolation Forest is tree-based, so no scaling is needed
 
-# Data normalization
-scaler = StandardScaler()
-data[['scaled_amount', 'scaled_hour_of_day']] = scaler.fit_transform(data[['amount', 'hour_of_day']])
+# Anomaly Detection using Isolation Forest (it never sees the 'is_fraud' column)
+model = IsolationForest(n_estimators=200, random_state=42)
+model.fit(data[features])
 
-# Anomaly Detection using Isolation Forest
-model = IsolationForest(n_estimators=100, contamination=0.01, random_state=42)
-data['anomaly'] = model.fit_predict(data[['scaled_amount', 'scaled_hour_of_day']])
+# score_samples: the lower the score, the more unusual the transaction
+data['anomaly_score'] = model.score_samples(data[features])
 
-# Filtering anomalies
-anomalies = data[data['anomaly'] == -1]
-print(anomalies)
-print(f"Number of anomalies detected: {len(anomalies)}")
+# Send the most unusual transactions to the fraud team, most suspicious first
+flagged = data.sort_values('anomaly_score').head(REVIEW_CAPACITY)
+print(flagged[['transaction_id', 'transaction_time', 'amount', 'anomaly_score']].to_string(
+    index=False, formatters={'anomaly_score': '{:.3f}'.format}))
+
+# Evaluation: compare the flags with the fraud cases that were confirmed later
+caught = flagged['is_fraud'].sum()
+total_fraud = data['is_fraud'].sum()
+print(f"\nFlagged for review: {len(flagged)} of {len(data)} transactions")
+print(f"Precision: {caught / len(flagged):.0%} of the flagged transactions were real fraud")
+print(f"Recall: {caught} of {total_fraud} real fraud cases were caught")
+
+# Baseline: a simple rule (review the largest amounts). The model must beat this.
+rule_caught = data.nlargest(REVIEW_CAPACITY, 'amount')['is_fraud'].sum()
+print(f"Baseline rule (review the {REVIEW_CAPACITY} largest amounts): {rule_caught} of {total_fraud} caught")
