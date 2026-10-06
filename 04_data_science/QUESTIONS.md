@@ -7,3 +7,5 @@
 16. You are tasked with identifying unusual transactions in a company's financial data that might suggest fraudulent activity. What steps would you take to develop an anomaly detection model, and can you provide a sample Python code snippet to illustrate how you would preprocess the data and apply an anomaly detection technique?
 
 17. You've developed a machine learning model to predict real estate prices based on various features like location,size, and amenities. How would you integrate this model into a web application to allow users to get real-time price predictions? Can you provide a sample Python code snippet to illustrate how you would prepare the model for integration and handle user requests?
+
+18. You are tasked with analyzing geospatial data to help a city improve its public transportation system. The data includes GPS coordinates of bus stops, ridership numbers, and traffic patterns. What steps would you take to analyze this data, and can you provide a sample Python code snippet to illustrate how you might visualize bus stop locations and ridership?

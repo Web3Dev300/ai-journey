@@ -61,7 +61,7 @@ model = Pipeline(steps=[
 # Train the model using numpy array so that it expects a 2D array during prediction
 model.fit(X.values, y.values)
 
-model_path = os.path.join(os.path.dirname(__file__), 'real_estate_model.pkl')
+model_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'real_estate_model.pkl')
 with open(model_path, 'wb') as f:
     pickle.dump(model, f)
 

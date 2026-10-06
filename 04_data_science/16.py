@@ -6,7 +6,7 @@ from sklearn.preprocessing import StandardScaler
 import os
 
 # Load dataset
-csv_path = os.path.join(os.path.dirname(__file__), 'transactions.csv')
+csv_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'transactions.csv')
 data = pd.read_csv(csv_path)
 data['transaction_time'] = pd.to_datetime(data['transaction_time'])
 

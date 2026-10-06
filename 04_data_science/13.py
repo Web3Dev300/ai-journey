@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import os
 
 # Load the dataset
-csv_path = os.path.join(os.path.dirname(__file__), 'customer_data.csv')
+csv_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'customer_data.csv')
 data = pd.read_csv(csv_path)
 
 # Simple preprocessing

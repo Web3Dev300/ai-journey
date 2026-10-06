@@ -5,7 +5,7 @@ import os
 app = Flask(__name__)
 
 # Load the pre-trained model
-pickle_path = os.path.join(os.path.dirname(__file__), 'real_estate_model.pkl')
+pickle_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'real_estate_model.pkl')
 model = pickle.load(open(pickle_path, 'rb'))
 
 @app.route('/predict', methods=['POST'])

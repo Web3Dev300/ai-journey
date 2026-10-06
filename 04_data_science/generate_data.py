@@ -53,7 +53,8 @@ random.shuffle(transactions)
 
 # We drop is_anomaly_label when saving because 16.py doesn't use it, but wait, it doesn't hurt.
 # Actually, let's keep it simple and match exactly what's expected plus id
-csv_path = '/run/media/shubh/New Volume/ai-journey/04_data_science/transactions.csv'
+import os
+csv_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'transactions.csv')
 with open(csv_path, 'w', newline='') as f:
     writer = csv.DictWriter(f, fieldnames=['transaction_id', 'transaction_time', 'amount'])
     writer.writeheader()

@@ -5,7 +5,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 import os
 # Load and prepare dataset
-csv_path = os.path.join(os.path.dirname(__file__), 'customer_data.csv')
+csv_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'customer_data.csv')
 data = pd.read_csv(csv_path)
 data['churn'] = data['churn'].map({'Yes': 1, 'No': 0}) # Encode target variable
 data['Gender'] = data['Gender'].map({'Male': 1, 'Female': 0}) # Encode Gender to numeric
